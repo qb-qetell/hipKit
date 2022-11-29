@@ -5,6 +5,8 @@ import "errors"
 import "fmt"
 import "net"
 import "regexp"
+import "sync"
+import "time"
 
 type HttpIntf struct {
 	intfAdrsP1xx     string
@@ -12,18 +14,18 @@ type HttpIntf struct {
 	srvxQtxx            int
 	mssgScrtEnfrStts   bool
 	mssgScrtRsrc     tls.Config
-	mssgHndl         func (cnnc net.Conn)
-	shtdSgnl           bool
+	mssgHndl         func (*Mssg)
 	lifeStts           bool
+	shtdSgnl           bool
 }
-	func HttpIntf_Estb ()   (*HttpIntf) {
+	func HttpIntf_Estb ()    (*HttpIntf)   {
 		return &HttpIntf {
-			intfAdrsP1xx:            "",
-			intfAdrsP2xx:             0,
-			srvxQtxx:                 0,
-			mssgScrtEnfrStts:     false,
-			shtdSgnl:             false,
-			shtdSgnl:             false,
+			intfAdrsP1xx:        "",
+			intfAdrsP2xx:         0,
+			srvxQtxx:             0,
+			mssgScrtEnfrStts: false,
+			lifeStts:         false,
+			shtdSgnl:         false,
 		}
 	}
 	func (i *HttpIntf) SetxIntfAdrs (p1xx string, p2xx int) (error) {
@@ -63,7 +65,7 @@ type HttpIntf struct {
 			return errors.New (_ca00)
 		}
 		/*--1--*/
-		i.mssgScrtEnfrStts =  true
+		i.mssgScrtEnfrStts = true
 		i.mssgScrtRsrc     = tls.Config {
 			Certificates: []tls.Certificate {_ba00},
 			ServerName:                       name ,
@@ -74,8 +76,35 @@ type HttpIntf struct {
 	func (i *HttpIntf) RlxxMssgScrt () {
 		i.mssgScrtEnfrStts = false
 	}
+	func (i *HttpIntf) SetxMssgHndl (m func (*Mssg)) (error) {
+		if m == nil {
+			_ca00 := fmt.Sprintf ("Message handler is invalid.")
+			return errors.New (_ca00)
+		}
+		i.mssgHndl =m
+		return nil
+	}
 	func (i *HttpIntf) Actv () (error, chan []string) {
-		_ba00, _bb00 := net.Listen ("tcp", i.p1xx + ":" + i.p2xx)
+		if i.lifeStts == true || i.shtdSgnl == true {
+			_ca00 := fmt.Sprintf ("This interface has alread been used.")
+			return errors.New (_ca00), nil
+		}
+		if i.intfAdrsP2xx ==    0 {
+			_ca00 := fmt.Sprintf ("Set the interface address.")
+			return errors.New (_ca00), nil
+		}
+		if i.srvxQtxx     ==    0 {
+			_ca00 := fmt.Sprintf ("Set the serving quota.")
+			return errors.New (_ca00), nil
+		}
+		if i.mssgHndl     ==  nil {
+			_ca00 := fmt.Sprintf ("Set the message handler.")
+			return errors.New (_ca00), nil
+		}
+		/*--1--*/
+		_ba00, _bb00 := net.Listen (
+			"tcp", fmt.Sprintf ("%s:%d", i.intfAdrsP1xx, i.intfAdrsP2xx),
+		)
 		if _bb00 != nil {
 			_ca00 := fmt.Sprintf ("%s", _bb00.Error ())
 			return errors.New (_ca00), nil
@@ -83,12 +112,87 @@ type HttpIntf struct {
 		/*--1--*/
 		i.lifeStts = true
 		_bc00 := make (chan []string, 1)
-		_bc00 <- []string {"ba10"}
+		_bc50 := time.Now ().In            (
+			time.FixedZone ("+0000", 0),
+		).Format (
+			"2006-01-02 15:04:05 -0700",
+		)
+		_bc00 <- []string {"ba01",    _bc50}
 		/*--1--*/
-		for {
-			
-		}
+		go func (i *HttpIntf, c chan []string) {
+			actvMssgCntx     :=              0
+			actvMssgCntxMtxx := &sync.Mutex {}
+			/*--2--*/
+			for {
+				time.Sleep (time.Millisecond * 1)
+				/*--2--*/
+				if actvMssgCntx == i.srvxQtxx   {
+					continue
+				}
+				/*--2--*/
+				_ca01, _cb00 :=  _ba00.Accept  ()
+				if _cb00 != nil && i.shtdSgnl == true {
+					i.lifeStts = false
+					_db00 := time.Now ().In            (
+						time.FixedZone ("+0000", 0),
+					).Format (
+						"2006-01-02 15:04:05 -0700",
+					)
+					c <- []string {"ba20", _db00}
+					return
+				}
+				/*--2--*/
+				if _cb00 != nil {
+					_da00 := fmt.Sprintf (
+						"Could not receive an incoming message. [%s]",
+						_cb00.Error (),
+					)
+					_db00 := time.Now ().In            (
+						time.FixedZone ("+0000", 0),
+					).Format (
+						"2006-01-02 15:04:05 -0700",
+					)
+					c <- []string {"ba10", _da00, _db00}
+					return
+				}
+				/*--2--*/
+				go func (c net.Conn, chnl chan []string, actvMssgCntx int,
+				actvMssgCntxMtxx *sync.Mutex) {
+					_da00 := mssg_Estb  (c)
+					/*--3--*/
+					defer func (actvMssgCntx      int,
+					actvMssgCntxMtxx *sync.Mutex)    {
+						actvMssgCntxMtxx.Lock   ()
+						actvMssgCntx = actvMssgCntx - 1
+						actvMssgCntxMtxx.Unlock ()
+					} (actvMssgCntx, actvMssgCntxMtxx)
+					/*--3--*/
+					defer func  (c chan []string) {
+						   _ea00 := recover  ()
+						if _ea00 != nil {
+							_fa00 := fmt.Sprintf (
+								"The handler paniced. [%v]",
+								_ea00,
+							)
+							_fb00 := time.Now ().In (
+								time.FixedZone ("+0000", 0),
+							).Format (
+								"2006-01-02 15:04:05 -0700",
+							)
+							c <- []string {"ba10", _fa00,_fb00}
+						}
+					}(chnl)
+					/*--3--*/
+					i.mssgHndl (_da00)
+				} (_ca01, c, actvMssgCntx, actvMssgCntxMtxx)
+				/*--2--*/
+				actvMssgCntxMtxx.Lock   ()
+				actvMssgCntx = actvMssgCntx + 1
+				actvMssgCntxMtxx.Unlock ()
+			}
+		} (i, _bc00)
 		/*--1--*/
-		return nil, nil
+		return nil, _bc00
 	} // close conn
 	func (i *HttpIntf) Halt ()  {}
+

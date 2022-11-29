@@ -12,8 +12,13 @@ type Mssg struct {
 	core net.Conn
 	lsxx     bool
 }
-	func mssg_Estb ()  (*Mssg) {return   &Mssg {  core: nil,   lsxx: false  }}
-	func (i *Mssg) ExtrCore () (net.Conn) { return i.core }
+	func mssg_Estb (c net.Conn) (   *Mssg) {
+		return &Mssg {
+			core:     c,
+			lsxx: false,
+		}
+	}
+	func (i *Mssg) ExtrCore  () (net.Conn) { return i.core }
 	func (i *Mssg) Read (wndw ... time.Duration) (error, []byte, *http.Rqst) {
 		_bb00   := time.Second  * 10
 		if wndw != nil && len (wndw) > 0 { _bb00 = wndw [0] }
