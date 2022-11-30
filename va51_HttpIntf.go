@@ -1,4 +1,4 @@
-package main
+package hipKit
 
 import "crypto/tls"
 import "errors"
@@ -30,7 +30,7 @@ type HttpIntf struct {
 	}
 	func (i *HttpIntf) SetxIntfAdrs (p1xx string, p2xx int) (error) {
 		_ba00 := net.ParseIP ("p1xx")
-		if _ba00 == nil {
+		if p1xx != "" && _ba00 == nil {
 			_ca00 := fmt.Sprintf ("Interface Address Part 1 is invalid.")
 			return errors.New (_ca00)
 		}
@@ -50,7 +50,8 @@ type HttpIntf struct {
 			_ca00 := fmt.Sprintf ("Serving quota is invalid.")
 			return errors.New (_ca00)
 		}
-		return nil
+		i.srvxQtxx = qtxx
+		return        nil
 	}
 	func (i *HttpIntf) EnfrMssgScrt (name, keyx, crtf string) (error) {
 		_ba00, _bb00 := tls.LoadX509KeyPair (crtf, keyx)
@@ -119,18 +120,19 @@ type HttpIntf struct {
 		)
 		_bc00 <- []string {"ba01",    _bc50}
 		/*--1--*/
-		go func (i *HttpIntf, c chan []string) {
+		go func (i *HttpIntf, l net.Listener, c chan []string) {
 			actvMssgCntx     :=              0
 			actvMssgCntxMtxx := &sync.Mutex {}
 			/*--2--*/
 			for {
 				time.Sleep (time.Millisecond * 1)
 				/*--2--*/
-				if actvMssgCntx == i.srvxQtxx   {
+				//fmt.Println (actvMssgCntx,  i.srvxQtxx)
+				if actvMssgCntx  ==  i.srvxQtxx {
 					continue
 				}
 				/*--2--*/
-				_ca01, _cb00 :=  _ba00.Accept  ()
+				_ca01,  _cb00   := l.Accept   ()
 				if _cb00 != nil && i.shtdSgnl == true {
 					i.lifeStts = false
 					_db00 := time.Now ().In            (
@@ -156,14 +158,22 @@ type HttpIntf struct {
 					return
 				}
 				/*--2--*/
-				go func (c net.Conn, chnl chan []string, actvMssgCntx int,
+				if i.mssgScrtEnfrStts == true {
+					_ca01 = tls.Server (_ca01, &i.mssgScrtRsrc)
+				}
+				/*--2--*/
+				actvMssgCntxMtxx.Lock   ()
+				actvMssgCntx = actvMssgCntx + 1
+				actvMssgCntxMtxx.Unlock ()
+				/*--2--*/
+				go func (c net.Conn, chnl chan []string, actvMssgCntx *int,
 				actvMssgCntxMtxx *sync.Mutex) {
 					_da00 := mssg_Estb  (c)
 					/*--3--*/
-					defer func (actvMssgCntx      int,
+					defer func (actvMssgCntx     *int,
 					actvMssgCntxMtxx *sync.Mutex)    {
 						actvMssgCntxMtxx.Lock   ()
-						actvMssgCntx = actvMssgCntx - 1
+						*actvMssgCntx = *actvMssgCntx - 1
 						actvMssgCntxMtxx.Unlock ()
 					} (actvMssgCntx, actvMssgCntxMtxx)
 					/*--3--*/
@@ -183,16 +193,29 @@ type HttpIntf struct {
 						}
 					}(chnl)
 					/*--3--*/
-					i.mssgHndl (_da00)
-				} (_ca01, c, actvMssgCntx, actvMssgCntxMtxx)
-				/*--2--*/
-				actvMssgCntxMtxx.Lock   ()
-				actvMssgCntx = actvMssgCntx + 1
-				actvMssgCntxMtxx.Unlock ()
+					defer _da00.core.Close ()
+					/*--3--*/
+					i.mssgHndl  (_da00)
+				} (_ca01, c, &actvMssgCntx, actvMssgCntxMtxx)
 			}
-		} (i, _bc00)
+		} (i, _ba00, _bc00)
+		/*--1--*/
+		go func (i *HttpIntf, l net.Listener) {
+			for {
+				if i.shtdSgnl == true {
+					l.Close ()
+				}
+				if i.shtdSgnl == true && i.lifeStts == false {
+					break
+				}
+				time.Sleep (time.Millisecond * 1)
+			}
+		} (i, _ba00)
 		/*--1--*/
 		return nil, _bc00
 	} // close conn
-	func (i *HttpIntf) Halt ()  {}
+	func (i *HttpIntf) Halt () {
+		if i.shtdSgnl == true { return }
+		i.shtdSgnl = true		
+	}
 

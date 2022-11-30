@@ -1,4 +1,4 @@
-package main
+package hipKit
 
 import "errors"
 import "fmt"
@@ -27,7 +27,7 @@ type Rspn struct {
 		if wndw  != nil && len (wndw) > 0 { _bb00 = wndw [0] }
 		i.core.SetWriteDeadline (time.Now ().Add (_bb00))
 		/*--1--*/
-		_, _bc00 := fmt.Fprint (i.core, _ba00)
+		_, _bc00 := i.core.Write (_ba00)
 		if _bc00 != nil {
 			_ca00 := fmt.Sprintf (
 				"An error occured while trying to send reply. [%s]",
