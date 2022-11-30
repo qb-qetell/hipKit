@@ -2,6 +2,7 @@ package hipKit
 
 import "fmt"
 import "testing"
+import "time"
 
 func TestTA00 (t *testing.T) {
 	_ba00 := HttpIntf_Estb ()
@@ -11,7 +12,7 @@ func TestTA00 (t *testing.T) {
 		fmt.Println (_ca00)
 		return
 	}
-	_bc00 :=  _ba00.SetxSrvxQtxx (1)
+	_bc00 :=  _ba00.SetxSrvxQtxx (3)
 	if _bc00 != nil {
 		_ca00 := fmt.Sprintf ("SetxSrvxQtxx error. [%s]", _bc00.Error ())
 		fmt.Println (_ca00)
@@ -23,13 +24,14 @@ func TestTA00 (t *testing.T) {
 		"/home/octm_qbqt/xb00_Qetell/cf00_hipKit/c.pem",
 	)
 	if _bd00 != nil {
-		_ca00 := fmt.Sprintf ("SetxSrvxQtxx error. [%s]", _bd00.Error ())
+		_ca00 := fmt.Sprintf ("EnfrMssgScrt error. [%s]", _bd00.Error ())
 		fmt.Println (_ca00)
 		return
 	}
+	//_ba00.RlxxMssgScrt ()
 	_be00 :=  _ba00.SetxMssgHndl (TA00_TA00)
 	if _be00 != nil {
-		_ca00 := fmt.Sprintf ("SetxSrvxQtxx error. [%s]", _be00.Error ())
+		_ca00 := fmt.Sprintf ("SetxMssgHndl error. [%s]", _be00.Error ())
 		fmt.Println (_ca00)
 		return
 	}
@@ -39,6 +41,10 @@ func TestTA00 (t *testing.T) {
 		fmt.Println (_ca00)
 		return
 	}
+	go func () {
+		 time.Sleep (time.Second * 8)
+		_ba00.Halt  ()
+	} ()
 	for {
 		_ca00 := <- _bg00
 		fmt.Println ("MSSG:", _ca00)

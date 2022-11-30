@@ -120,30 +120,30 @@ type HttpIntf struct {
 		)
 		_bc00 <- []string {"ba01",    _bc50}
 		/*--1--*/
-		go func (i *HttpIntf, l net.Listener, c chan []string) {
-			actvMssgCntx     :=              0
+		actvMssgCntx := 0
+		go func (i *HttpIntf, l net.Listener, c chan []string, actvMssgCntx *int) {
 			actvMssgCntxMtxx := &sync.Mutex {}
 			/*--2--*/
 			for {
 				time.Sleep (time.Millisecond * 1)
 				/*--2--*/
-				//fmt.Println (actvMssgCntx,  i.srvxQtxx)
-				if actvMssgCntx  ==  i.srvxQtxx {
-					continue
-				}
+				if i.shtdSgnl == true {
+					if *actvMssgCntx  ==  0 {
+						i.lifeStts = false
+						_db00 := time.Now ().In            (
+							time.FixedZone ("+0000", 0),
+						).Format (
+							"2006-01-02 15:04:05 -0700",
+						)
+						c <- []string {"ba20", _db00}
+						return
+					} else  { continue }
+				}				
 				/*--2--*/
-				_ca01,  _cb00   := l.Accept   ()
-				if _cb00 != nil && i.shtdSgnl == true {
-					i.lifeStts = false
-					_db00 := time.Now ().In            (
-						time.FixedZone ("+0000", 0),
-					).Format (
-						"2006-01-02 15:04:05 -0700",
-					)
-					c <- []string {"ba20", _db00}
-					return
-				}
+				if *actvMssgCntx == i.srvxQtxx { continue }
 				/*--2--*/
+				_ca01,  _cb00    := l.Accept ()
+				if _cb00 != nil  && i.shtdSgnl == true { continue }
 				if _cb00 != nil {
 					_da00 := fmt.Sprintf (
 						"Could not receive an incoming message. [%s]",
@@ -158,17 +158,18 @@ type HttpIntf struct {
 					return
 				}
 				/*--2--*/
+				_cc00 := _ca01
 				if i.mssgScrtEnfrStts == true {
-					_ca01 = tls.Server (_ca01, &i.mssgScrtRsrc)
+					_cc00 = tls.Server (_ca01, &i.mssgScrtRsrc)
 				}
 				/*--2--*/
 				actvMssgCntxMtxx.Lock   ()
-				actvMssgCntx = actvMssgCntx + 1
+				*actvMssgCntx = *actvMssgCntx + 1
 				actvMssgCntxMtxx.Unlock ()
 				/*--2--*/
-				go func (c net.Conn, chnl chan []string, actvMssgCntx *int,
-				actvMssgCntxMtxx *sync.Mutex) {
-					_da00 := mssg_Estb  (c)
+				go func (c1xx, c2xx net.Conn,  chnl chan []string,
+				actvMssgCntx *int, actvMssgCntxMtxx *sync.Mutex) {
+					_da00   := mssg_Estb(c2xx)
 					/*--3--*/
 					defer func (actvMssgCntx     *int,
 					actvMssgCntxMtxx *sync.Mutex)    {
@@ -177,8 +178,8 @@ type HttpIntf struct {
 						actvMssgCntxMtxx.Unlock ()
 					} (actvMssgCntx, actvMssgCntxMtxx)
 					/*--3--*/
-					defer func  (c chan []string) {
-						   _ea00 := recover  ()
+					defer func (c chan []string) {
+						   _ea00 := recover ()
 						if _ea00 != nil {
 							_fa00 := fmt.Sprintf (
 								"The handler paniced. [%v]",
@@ -193,24 +194,29 @@ type HttpIntf struct {
 						}
 					}(chnl)
 					/*--3--*/
-					defer _da00.core.Close ()
+					defer c1xx.Close ()
+					defer c2xx.Close ()
 					/*--3--*/
 					i.mssgHndl  (_da00)
-				} (_ca01, c, &actvMssgCntx, actvMssgCntxMtxx)
+				} (_ca01, _cc00, c, actvMssgCntx,
+				actvMssgCntxMtxx)
 			}
-		} (i, _ba00, _bc00)
+		} (i, _ba00, _bc00, &actvMssgCntx)
 		/*--1--*/
-		go func (i *HttpIntf, l net.Listener) {
+		go func (intf *HttpIntf,   lstn  net.Listener,   actvMssgCntx *int) {
 			for {
-				if i.shtdSgnl == true {
-					l.Close ()
+				time.Sleep (time.Millisecond  *  1)
+				if intf.shtdSgnl == true && *actvMssgCntx    >    0 {
+					continue
 				}
-				if i.shtdSgnl == true && i.lifeStts == false {
+				if intf.shtdSgnl == true  {
+					lstn.Close    ()
+				}
+				if intf.shtdSgnl == true &&  intf.lifeStts == false {
 					break
 				}
-				time.Sleep (time.Millisecond * 1)
 			}
-		} (i, _ba00)
+		} (i, _ba00, &actvMssgCntx)
 		/*--1--*/
 		return nil, _bc00
 	} // close conn

@@ -31,9 +31,18 @@ type Mssg struct {
 			i.core.SetReadDeadline  (_ca00)
 			_ca50, _cb00 := i.core.Read (_bc50)
 			/*--2--*/
-			if _ca50 != 0  { _bc00 = append (_bc00, _bc50 [0:_ca50]...) }
+			if _cb00 != nil && errors.Is (_cb00, os.ErrDeadlineExceeded) == false&&
+				_cb00 ==      io.EOF {
+				_da00 := fmt.Sprintf (
+					"BB00: An error occured while reading this message. " +
+					"[%s]", _cb00.Error (),
+				)
+				return errors.New (_da00), _bc00, nil
+			}
 			/*--2--*/
-			if _ca50 < len ( _bc50)  {
+			if _ca50 !=  0  { _bc00 = append (_bc00, _bc50 [0:_ca50]...) }
+			/*--2--*/
+			if _ca50  < len ( _bc50)  {
 				break
 			} else if _cb00 != nil  &&  _cb00 == io.EOF {
 				break
@@ -44,13 +53,6 @@ type Mssg struct {
 				_da00 := fmt.Sprintf (
 					"BA50: Could not read full message. [%s]",
 					_cb00.Error (),
-				)
-				return errors.New (_da00), _bc00, nil
-			} else if _cb00 != nil  &&
-				errors.Is (_cb00, os.ErrDeadlineExceeded) == false {
-				_da00 := fmt.Sprintf (
-					"BB00: An error occured while reading this message. " +
-					"[%s]", _cb00.Error (),
 				)
 				return errors.New (_da00), _bc00, nil
 			}
