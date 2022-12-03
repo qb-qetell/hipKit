@@ -113,12 +113,6 @@ type HttpIntf struct {
 		/*--1--*/
 		i.lifeStts = true
 		_bc00 := make (chan []string, 1)
-		_bc50 := time.Now ().In            (
-			time.FixedZone ("+0000", 0),
-		).Format (
-			"2006-01-02 15:04:05 -0700",
-		)
-		_bc00 <- []string {"ba01",    _bc50}
 		/*--1--*/
 		actvMssgCntx := 0
 		go func (i *HttpIntf, l net.Listener, c chan []string, actvMssgCntx *int) {

@@ -17,7 +17,7 @@ func TestTA00 (t *testing.T) {
 		_ca00 := fmt.Sprintf ("SetxSrvxQtxx error. [%s]", _bc00.Error ())
 		fmt.Println (_ca00)
 		return
-	}
+	}/*
 	_bd00 :=  _ba00.EnfrMssgScrt (
 		"localhost",
 		"/home/octm_qbqt/xb00_Qetell/cf00_hipKit/k.pem",
@@ -27,7 +27,7 @@ func TestTA00 (t *testing.T) {
 		_ca00 := fmt.Sprintf ("EnfrMssgScrt error. [%s]", _bd00.Error ())
 		fmt.Println (_ca00)
 		return
-	}
+	}*/
 	//_ba00.RlxxMssgScrt ()
 	_be00 :=  _ba00.SetxMssgHndl (TA00_TA00)
 	if _be00 != nil {
