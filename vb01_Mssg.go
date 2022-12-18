@@ -27,7 +27,7 @@ type Mssg struct {
 		_bc00 := make ([]byte,    0)
 		_bc50 := make ([]byte, 1024)
 		for {
-			_ca00 := time.Now ().Add (time.Millisecond * 10)
+ 			_ca00 := time.Now ().Add (time.Millisecond * 100)
 			i.core.SetReadDeadline  (_ca00)
 			_ca50, _cb00 := i.core.Read (_bc50)
 			/*--2--*/

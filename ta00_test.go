@@ -42,7 +42,7 @@ func TestTA00 (t *testing.T) {
 		return
 	}
 	go func () {
-		 time.Sleep (time.Second * 8)
+		 time.Sleep (time.Second * 800000)
 		_ba00.Halt  ()
 	} ()
 	for {

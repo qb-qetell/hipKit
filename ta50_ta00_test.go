@@ -9,14 +9,15 @@ func TA00_TA00 (m *Mssg) {
 	) + ":"
 	fmt.Println ("HNDL:", _ak00)
 	/*--1--*/
-	_ba00, _bb00, _bc00 := m.Read (time.Second *  4)
+	_ba00, _bb00, _bc00 := m.Read ()
+	//_ba00, _bb00, _bc00 := m.Read (time.Second *  4)
 	if _ba00 !=  nil {
 		_ca00 := fmt.Sprintf  ("Read error. [%s]", _ba00.Error ())
 		fmt.Println (_ca00 )
 		return
 	}
 	/*--1--*/
-	time.Sleep (time.Second * 12)
+	time.Sleep  (time.Second * 2)
 	fmt.Println (string (_bb00     ))
 	fmt.Println (string (_bc00.Core))
 	_ = _bb00
