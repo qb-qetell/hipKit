@@ -35,7 +35,7 @@ func TestTA00 (t *testing.T) {
 		fmt.Println ( _ca00 )
 		return
 	}
-	_bf00,  _bg00 := _ba00.Actv ()
+	_bf00,  _bg00 := _ba00.Actv()
 	if _bf00 != nil {
 		_ca00 :=fmt.Sprintf ("Actv----!!!! error. [%s]", _bf00.Error ())
 		fmt.Println ( _ca00 )
@@ -46,9 +46,7 @@ func TestTA00 (t *testing.T) {
 		_ba00.Halt  ()
 	} ()
 	for {
-		fmt.Println ("aa10")
 		_ca00 := <-  _bg00
-		fmt.Println ("aa20")
 		fmt.Println ("MSSG:", _ca00)
 	}
 }

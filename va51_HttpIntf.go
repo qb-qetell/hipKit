@@ -85,7 +85,7 @@ type HttpIntf struct {
 		i.mssgHndl =m
 		return nil
 	}
-	func (i *HttpIntf) Actv () (error, chan []string) {
+	func (i *HttpIntf) Actv () (error,   chan []string) {
 		if i.lifeStts == true || i.shtdSgnl == true {
 			_ca00 := fmt.Sprintf ("This interface has alread been used.")
 			return errors.New (_ca00), nil
@@ -138,6 +138,7 @@ type HttpIntf struct {
 				/*--2--*/
 				_ca01,  _cb00    := l.Accept ()
 				if _cb00 != nil  && i.shtdSgnl == true { continue }
+				fmt.Println ("ea00")
 				if _cb00 != nil {
 					_da00 := fmt.Sprintf (
 						"Could not receive an incoming message. [%s]",
@@ -151,15 +152,18 @@ type HttpIntf struct {
 					c <- []string {"ba10", _da00, _db00}
 					return
 				}
+				fmt.Println ("eb00")
 				/*--2--*/
 				_cc00 := _ca01
 				if i.mssgScrtEnfrStts == true {
 					_cc00 = tls.Server (_ca01, &i.mssgScrtRsrc)
 				}
+				fmt.Println ("ec00")
 				/*--2--*/
 				actvMssgCntxMtxx.Lock   ()
 				*actvMssgCntx = *actvMssgCntx + 1
 				actvMssgCntxMtxx.Unlock ()
+				fmt.Println ("ed00")
 				/*--2--*/
 				go func (c1xx, c2xx net.Conn,  chnl chan []string,
 				actvMssgCntx *int, actvMssgCntxMtxx *sync.Mutex) {
