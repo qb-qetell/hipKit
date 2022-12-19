@@ -103,8 +103,8 @@ type HttpIntf struct {
 			return errors.New (_ca00), nil
 		}
 		/*--1--*/
-		_ba00, _bb00 := net.Listen (
-			"tcp", fmt.Sprintf ("%s:%d", i.intfAdrsP1xx, i.intfAdrsP2xx),
+		_ba00, _bb00:= net.Listen (
+			"tcp", fmt.Sprintf("%s:%d", i.intfAdrsP1xx, i.intfAdrsP2xx),
 		)
 		if _bb00 != nil {
 			_ca00 := fmt.Sprintf ("%s", _bb00.Error ())
@@ -197,16 +197,16 @@ type HttpIntf struct {
 			}
 		} (i, _ba00, _bc00, &actvMssgCntx)
 		/*--1--*/
-		go func (intf *HttpIntf,   lstn  net.Listener,   actvMssgCntx *int) {
+		go func (intf *HttpIntf,    lstn net.Listener,    actvMssgCntx *int  ) {
 			for {
-				time.Sleep (time.Millisecond  *  1)
-				if intf.shtdSgnl == true && *actvMssgCntx    >    0 {
+				time.Sleep (time.Millisecond * 1)
+				if intf.shtdSgnl == true    &&  *actvMssgCntx >      0 {
 					continue
 				}
 				if intf.shtdSgnl == true  {
 					lstn.Close    ()
 				}
-				if intf.shtdSgnl == true &&  intf.lifeStts == false {
+				if intf.shtdSgnl == true    &&  intf.lifeStts == false {
 					break
 				}
 			}

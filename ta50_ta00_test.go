@@ -17,7 +17,7 @@ func TA00_TA00 (m *Mssg) {
 		return
 	}
 	/*--1--*/
-	time.Sleep  (time.Second * 2)
+	time.Sleep  (time.Second   *   1)
 	fmt.Println (string (_bb00     ))
 	fmt.Println (string (_bc00.Core))
 	_ = _bb00
