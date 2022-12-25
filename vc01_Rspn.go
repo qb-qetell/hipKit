@@ -10,7 +10,7 @@ type Rspn struct {
 	core   net.Conn
 	rspn *thxx.Rspn
 }
-	func rspn_Estb (core net.Conn, rspn []byte) (*Rspn) { // --}
+	func rspn_Estb (core net.Conn, rspn []byte) (*Rspn) /*--*/ {
 		_ba00 := &Rspn {core: core, rspn: thxx.RSPN_Estb ()}
 		_ba00.rspn.Core = rspn
 		return _ba00

@@ -138,7 +138,6 @@ type HttpIntf struct {
 				/*--2--*/
 				_ca01,  _cb00    := l.Accept ()
 				if _cb00 != nil  && i.shtdSgnl == true { continue }
-				fmt.Println ("ea00")
 				if _cb00 != nil {
 					_da00 := fmt.Sprintf (
 						"Could not receive an incoming message. [%s]",
@@ -152,22 +151,21 @@ type HttpIntf struct {
 					c <- []string {"ba10", _da00, _db00}
 					return
 				}
-				fmt.Println ("eb00")
 				/*--2--*/
 				_cc00 := _ca01
+				_cc00  =  nil
 				if i.mssgScrtEnfrStts == true {
 					_cc00 = tls.Server (_ca01, &i.mssgScrtRsrc)
 				}
-				fmt.Println ("ec00")
 				/*--2--*/
 				actvMssgCntxMtxx.Lock   ()
 				*actvMssgCntx = *actvMssgCntx + 1
 				actvMssgCntxMtxx.Unlock ()
-				fmt.Println ("ed00")
 				/*--2--*/
 				go func (c1xx, c2xx net.Conn,  chnl chan []string,
 				actvMssgCntx *int, actvMssgCntxMtxx *sync.Mutex) {
-					_da00   := mssg_Estb(c2xx)
+					_da00 := mssg_Estb (c1xx)
+					if c2xx != nil {_da00 = mssg_Estb (c2xx) }
 					/*--3--*/
 					defer func (actvMssgCntx     *int,
 					actvMssgCntxMtxx *sync.Mutex)    {
@@ -190,14 +188,13 @@ type HttpIntf struct {
 							)
 							c <- []string {"ba10", _fa00,_fb00}
 						}
-					}(chnl)
+					} (chnl)
 					/*--3--*/
 					defer c1xx.Close ()
-					defer c2xx.Close ()
+					if c2xx != nil { defer c2xx.Close () }
 					/*--3--*/
 					i.mssgHndl  (_da00)
-				} (_ca01, _cc00, c, actvMssgCntx,
-				actvMssgCntxMtxx)
+				} (_ca01, _cc00, c, actvMssgCntx, actvMssgCntxMtxx)
 			}
 		} (i, _ba00, _bc00, &actvMssgCntx)
 		/*--1--*/
