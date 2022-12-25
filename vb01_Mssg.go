@@ -22,7 +22,7 @@ type Mssg struct {
 	func (i *Mssg) Read (wndw ... time.Duration) (error, []byte, *http.Rqst) {
 		_bb00 := time.Second * 10
 		if wndw != nil && len (wndw) > 0 { _bb00 = wndw [0] }
-		_bb25 := time.Now ( ).Add (_bb00)
+		_bb25 := time.Now ().Add (_bb00)
 		/*--1--*/
 		_bc00 := make ([]byte,    0)
 		_bc50 := make ([]byte, 1024)

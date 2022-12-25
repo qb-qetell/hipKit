@@ -16,7 +16,7 @@ type Rspn struct {
 		return _ba00
 	}
 	func (i *Rspn) SetxCode (code string) { i.rspn.Code = code }
-	func (i *Rspn) SetxNote (note string) { i.rspn.Code = note }
+	func (i *Rspn) SetxNote (note string) { i.rspn.Note = note }
 	func (i *Rspn) SetxHdrr (name, vlll string) {
 		i.rspn.InsrHdrr (name, vlll       )
 	}
