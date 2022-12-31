@@ -3,7 +3,10 @@ package hipKit
 import "fmt"
 import "time"
 
-func TA00_TA00 (m *Mssg) {
+func TA00_TA00 (c interface {}, m *Mssg) {
+	_ac00 := fmt.Sprintf ("%v",  c)
+	fmt.Println (_ac00)
+	/*--1--*/
 	_ak00 := ":---: " + time.Now ().In (time.FixedZone ("+0000", 0)).Format (
 		"2006-01-02 15:04:05 -0700",
 	) + ":"
@@ -30,4 +33,8 @@ func TA00_TA00 (m *Mssg) {
 		fmt.Println (_ca00 )
 		return
 	}
+}
+
+func cnfg_cnfg () (error, interface{}) {
+	return nil, []string {"aa", "x"}
 }

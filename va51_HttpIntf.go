@@ -14,7 +14,8 @@ type HttpIntf struct {
 	srvxQtxx            int
 	mssgScrtEnfrStts   bool
 	mssgScrtRsrc     tls.Config
-	mssgHndl         func (*Mssg)
+	cnfgPrvd         func () (error, interface{})
+	mssgHndl         func (interface{}, *Mssg) ()
 	lifeStts           bool
 	shtdSgnl           bool
 }
@@ -77,12 +78,20 @@ type HttpIntf struct {
 	func (i *HttpIntf) RlxxMssgScrt () {
 		i.mssgScrtEnfrStts = false
 	}
-	func (i *HttpIntf) SetxMssgHndl (m func (*Mssg)) (error) {
+	func (i *HttpIntf) SetxCnfgPrvd (m func () (error, interface{})) (error) {
+		if m == nil {
+			_ca00 := fmt.Sprintf ("Config provider is invalid.")
+			return errors.New (_ca00)
+		}
+		i.cnfgPrvd= m
+		return nil
+	}
+	func (i *HttpIntf) SetxMssgHndl (m func (interface{}, *Mssg) ()) (error) {
 		if m == nil {
 			_ca00 := fmt.Sprintf ("Message handler is invalid.")
 			return errors.New (_ca00)
 		}
-		i.mssgHndl =m
+		i.mssgHndl= m
 		return nil
 	}
 	func (i *HttpIntf) Actv () (error,   chan []string) {
@@ -152,6 +161,21 @@ type HttpIntf struct {
 					return
 				}
 				/*--2--*/
+				_cb10,  _cb20 := i.cnfgPrvd ()
+				if _cb10 != nil {
+					_da00 := fmt.Sprintf (
+						"Could not collect config. [%s]",
+						_cb10.Error (),
+					)
+					_db00 := time.Now ().In            (
+						time.FixedZone ("+0000", 0),
+					).Format (
+						"2006-01-02 15:04:05 -0700",
+					)
+					c <- []string {"ba10", _da00, _db00}
+					return
+				}
+				/*--2--*/
 				_cc00 := _ca01
 				_cc00  =  nil
 				if i.mssgScrtEnfrStts == true {
@@ -162,8 +186,9 @@ type HttpIntf struct {
 				*actvMssgCntx = *actvMssgCntx + 1
 				actvMssgCntxMtxx.Unlock ()
 				/*--2--*/
-				go func (c1xx, c2xx net.Conn,  chnl chan []string,
-				actvMssgCntx *int, actvMssgCntxMtxx *sync.Mutex) {
+				go func (chnl chan []string, actvMssgCntx *int,
+				actvMssgCntxMtxx *sync.Mutex, c1xx, c2xx net.Conn,
+				cnfg interface{}) {
 					_da00 := mssg_Estb (c1xx)
 					if c2xx != nil {_da00 = mssg_Estb (c2xx) }
 					/*--3--*/
@@ -193,8 +218,8 @@ type HttpIntf struct {
 					defer c1xx.Close ()
 					if c2xx != nil { defer c2xx.Close () }
 					/*--3--*/
-					i.mssgHndl  (_da00)
-				} (_ca01, _cc00, c, actvMssgCntx, actvMssgCntxMtxx)
+					i.mssgHndl  (cnfg, _da00)
+				} (c, actvMssgCntx, actvMssgCntxMtxx, _ca01, _cc00, _cb20)
 			}
 		} (i, _ba00, _bc00, &actvMssgCntx)
 		/*--1--*/

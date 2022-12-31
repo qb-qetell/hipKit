@@ -29,6 +29,12 @@ func TestTA00 (t *testing.T) {
 		return
 	}*/
 	//_ba00.RlxxMssgScrt ()
+	_bd50 := _ba00.SetxCnfgPrvd (cnfg_cnfg)
+	if _bd50 != nil {
+		_ca00 :=fmt.Sprintf ("SetxCnfgPrvd error. [%s]", _bd50.Error ())
+		fmt.Println ( _ca00 )
+		return
+	}
 	_be00 := _ba00.SetxMssgHndl (TA00_TA00)
 	if _be00 != nil {
 		_ca00 :=fmt.Sprintf ("SetxMssgHndl error. [%s]", _be00.Error ())
