@@ -2,7 +2,7 @@ package hipKit
 
 import "errors"
 import "fmt"
-import "github.com/qb-qetell/http"
+import "github.com/qb-qetell/http/v2"
 import "io"
 import "net"
 import "os"

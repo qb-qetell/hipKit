@@ -2,7 +2,7 @@ package hipKit
 
 import "errors"
 import "fmt"
-import thxx "github.com/qb-qetell/http"
+import thxx "github.com/qb-qetell/http/v2"
 import "net"
 import "time"
 
